@@ -4,6 +4,8 @@ use opencv::core::{DMatch, KeyPoint, Mat, Point2f, Vector, DecompTypes};
 use opencv::core::Scalar;
 use opencv::imgproc::warp_perspective;
 
+use crate::star_detection;
+
 
 /// Takes to list of keypoints and tries to match each one to another.
 /// This matching algorithm matches each point $P$ points from the `source` dataset,
@@ -104,25 +106,47 @@ pub fn find_alignment_homography(
 
 
 pub fn align_series(images: &[Mat], keypoints: &[Vector<KeyPoint>]) -> Vec<Mat> {
+    // let homographies = images.iter().enumerate().skip(1).map(|(i, im)| {
+    //     let matches = get_matches(&keypoints[i], &keypoints[i - 1]);
+    //     info!("Calculating Homography for {} to {} ({} matches)", i, i-1, matches.len());
+    //     find_alignment_homography(&matches, &keypoints[i], &keypoints[i - 1])
+    // }).collect::<Vec<Mat>>();
+    // }
 
-    let homographies = images.iter().skip(1).enumerate().map(|(i, im)| {
-        info!("Calculating Homography for {} to {}", i, i-1);
-        let matches = get_matches(&keypoints[i], &keypoints[i - 1]);
-        find_alignment_homography(&matches, &keypoints[i], &keypoints[i - 1])
-    }).collect::<Vec<Mat>>();
+    let mut stack = vec![];
+
+    for i in (1..images.len() - 1).rev() {
+        let target_keypoints = &keypoints[i - 1];
+        stack.push(
+            (images[i].clone(), keypoints[i].clone())
+        );
+
+        // process stack
+        stack.iter_mut().for_each(|(im, keypoint)| {
+
+            *keypoint = star_detection::detect_keypoints(im);
+
+            let matches = get_matches(keypoint, target_keypoints);
+            let homography = find_alignment_homography(
+                &matches, keypoint, target_keypoints
+            );
 
 
-    images.iter().skip(1).zip(homographies).map(|(im, homography)| {
-        let mut warped = Mat::default();
-        warp_perspective(&im,
-                         &mut warped,
-                         &homography,
-                         opencv::core::Size_ { width: 1867, height: 2800 },
-                         0,
-                         0,
-                         Scalar::default());
-        warped
-    }).collect()
+            let mut warped = Mat::default();
+            warp_perspective(im,
+                            &mut warped,
+                            &homography,
+                            opencv::core::Size_ { width: 1867, height: 2800 },
+                            0,
+                            0,
+                            Scalar::default()
+            ).unwrap();
+
+            *im = warped
+        });
+    }
+
+    stack.into_iter().map(|(im, _)| im).collect()
 }
 
 

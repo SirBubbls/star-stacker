@@ -7,8 +7,8 @@ pub fn detect_keypoints(image: &Mat) -> Vector<KeyPoint> {
     let mut keypoints = Vector::<KeyPoint>::default();
 
     let mut star_detector = opencv::xfeatures2d::StarDetector::create(
-            10,
-            28,
+            5,
+            5,
             10,
             8,
             5
