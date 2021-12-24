@@ -43,6 +43,9 @@ fn main() {
 
     // load images
     let images = image_loading::load_image_series(cli_matches.value_of("input").unwrap());
+    let stacked = stack_image(&images);
+    imshow("stacked without alignment", &stacked).unwrap();
+    wait_key(0).unwrap();
 
     // extract stars
     let keypoints = images
