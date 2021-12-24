@@ -106,12 +106,7 @@ pub fn find_alignment_homography(
 
 
 pub fn align_series(images: &[Mat], keypoints: &[Vector<KeyPoint>]) -> Vec<Mat> {
-    // let homographies = images.iter().enumerate().skip(1).map(|(i, im)| {
-    //     let matches = get_matches(&keypoints[i], &keypoints[i - 1]);
-    //     info!("Calculating Homography for {} to {} ({} matches)", i, i-1, matches.len());
-    //     find_alignment_homography(&matches, &keypoints[i], &keypoints[i - 1])
-    // }).collect::<Vec<Mat>>();
-    // }
+    let size = images[0].size().unwrap();
 
     let mut stack = vec![];
 
@@ -131,12 +126,11 @@ pub fn align_series(images: &[Mat], keypoints: &[Vector<KeyPoint>]) -> Vec<Mat> 
                 &matches, keypoint, target_keypoints
             );
 
-
             let mut warped = Mat::default();
             warp_perspective(im,
                             &mut warped,
                             &homography,
-                            opencv::core::Size_ { width: 1867, height: 2800 },
+                            size,
                             0,
                             0,
                             Scalar::default()
