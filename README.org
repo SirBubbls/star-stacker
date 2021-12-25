@@ -1,0 +1,18 @@
+#+TITLE:Star Stacker
+#+AUTHOR: Lucas Sas
+#+EMAIL: lucassas@live.de
+#+DATE: December 25, 2021
+#+STARTUP: inlineimages nofold
+#+SETUPFILE: https://fniessen.github.io/org-html-themes/setup/theme-readtheorg.setup
+#+EXPORT_FILE_NAME: docs/index.html
+
+* Description
+** Maintainers
++ @SirBubbls
+* Installation
+* Usage
+
+* Results
+[[./docs/images/side-by-side-bright.jpg]]
+
+[[./docs/images/side-by-side-close.jpg]]
