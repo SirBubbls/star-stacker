@@ -7,12 +7,27 @@
 #+EXPORT_FILE_NAME: docs/index.html
 
 * Description
+This crate is an exposure stacking implementation for /astrophotography/.
+[[https://sirbubbls.github.io/star-stacking][Here]] you can find a blog post explaining what this repository is about exactly.
+
+This package primarily relies on ~opencv~ to read/write and process images.
+
 ** Maintainers
 + @SirBubbls
+
 * Installation
+- Install Rust as you normally would (via ~rustup~)
+- ~opencv~ will be installed with cargo
+
 * Usage
+You can just compile and run this program with:
+
+#+begin_src bash
+cargo run -- -i "GLOB_IMAGES" -o "output.png"
+#+end_src
 
 * Results
 [[./docs/images/side-by-side-bright.jpg]]
 
 [[./docs/images/side-by-side-close.jpg]]
+
