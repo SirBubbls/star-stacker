@@ -2,10 +2,7 @@ use log::{debug, info};
 use opencv::calib3d::{find_homography, RANSAC};
 use opencv::core::{DMatch, KeyPoint, Mat, Point2f, Vector, DecompTypes};
 use opencv::core::Scalar;
-use opencv::prelude::*;
 use opencv::imgproc::warp_perspective;
-
-use crate::star_detection;
 
 
 /// Takes to list of keypoints and tries to match each one to another.
@@ -62,7 +59,7 @@ pub fn get_matches(
     let matches: Vector<DMatch> = Vector::from_iter(
         min_pos_delta_match(source, dest)
             .into_iter()
-            .filter(|x| x.distance < 3.5),
+            .filter(|x| x.distance < 20.0),
     );
     matches.iter().for_each(|m| {
         debug!(
@@ -107,45 +104,25 @@ pub fn find_alignment_homography(
 
 
 pub fn align_series(images: &[Mat], keypoints: &[Vector<KeyPoint>]) -> Vec<Mat> {
-    let size = images[0].size().unwrap();
 
-    let mut stack = vec![];
+    let homographies = images.iter().skip(1).enumerate().map(|(i, im)| {
+        info!("Calculating Homography for {} to {}", i, i-1);
+        let matches = get_matches(&keypoints[i], &keypoints[i - 1]);
+        find_alignment_homography(&matches, &keypoints[i], &keypoints[i - 1])
+    }).collect::<Vec<Mat>>();
 
-    info!("Aligning {} frames", images.len());
 
-    for i in (1..images.len()).rev() {
-        let target_keypoints = &keypoints[i - 1];
-        stack.push(
-            (images[i].clone(), keypoints[i].clone())
-        );
-
-        // process stack
-        stack.iter_mut().for_each(|(im, keypoint)| {
-
-            *keypoint = star_detection::detect_keypoints(im);
-
-            let matches = get_matches(keypoint, target_keypoints);
-            let homography = find_alignment_homography(
-                &matches, keypoint, target_keypoints
-            );
-
-            let mut warped = Mat::default();
-            warp_perspective(im,
-                            &mut warped,
-                            &homography,
-                            size,
-                            0,
-                            0,
-                            Scalar::default()
-            ).unwrap();
-
-            *im = warped
-        });
-    }
-
-    stack.push((images[0].clone(), Vector::default()));
-    info!("Aligned {} frames", stack.len());
-    stack.into_iter().map(|(im, _)| im).collect()
+    images.iter().skip(1).zip(homographies).map(|(im, homography)| {
+        let mut warped = Mat::default();
+        warp_perspective(&im,
+                         &mut warped,
+                         &homography,
+                         opencv::core::Size_ { width: 1867, height: 2800 },
+                         0,
+                         0,
+                         Scalar::default());
+        warped
+    }).collect()
 }
 
 

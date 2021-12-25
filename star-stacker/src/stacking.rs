@@ -1,4 +1,7 @@
 use opencv::core::{Mat, add_weighted};
+use opencv::photo::fast_nl_means_denoising_colored;
+use log::info;
+use rayon::prelude::*;
 
 
 pub fn stack_image(images: &[Mat]) -> Mat {
@@ -6,22 +9,22 @@ pub fn stack_image(images: &[Mat]) -> Mat {
         return images.first().unwrap().clone();
     }
 
-    let mut stacked = Mat::default();
-    add_weighted(
-        &images[0],
-        1.0 / images.len() as f64,
-        &images[1],
-        1.0 / images.len() as f64,
-        0.0,
-        &mut stacked,
-        -1
-    ).expect("Unable to stack frames.");
+    // info!("Applying Denoising");
+    // let images = images.iter().map(|im| {
+    //     let mut dest = Mat::default();
+    //     fast_nl_means_denoising_colored(im, &mut dest, 2.0, 2.0, 7, 7).unwrap();
+    //     dest
+    // }).collect::<Vec<Mat>>();
 
-    images.iter().skip(2).for_each(|x| {
+    let mut stacked = images[0].clone();
+
+    info!("Stacking");
+    images.iter().enumerate().skip(1).for_each(|(i, x)| {
+        let alpha = 1.0 / i as f64;
         add_weighted(&stacked.clone(),
-                     1.0,
+                     1.0 - alpha,
                      x,
-                     1.0 / images.len() as f64,
+                     alpha,
                      0.0,
                      &mut stacked,
                      -1).expect("Unable to stack frames.");

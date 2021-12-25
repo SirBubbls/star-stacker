@@ -43,10 +43,9 @@ fn main() {
 
     // load images
     let images = image_loading::load_image_series(cli_matches.value_of("input").unwrap());
-    let stacked = stack_image(&images);
-    imshow("stacked without alignment", &stacked).unwrap();
-    wait_key(0).unwrap();
 
+    let stacked = stack_image(&images);
+    imwrite("stacked.jpg", &stacked, &Vector::default()).unwrap();
     // extract stars
     let keypoints = images
         .iter()
@@ -54,6 +53,9 @@ fn main() {
         .collect::<Vec<Vector<KeyPoint>>>();
 
     let aligned = alignment::align_series(&images, &keypoints);
+
+
+    info!("Stacking {} frames", aligned.len());
     let stacked = stack_image(&aligned);
     imshow("Stacked and aligned", &stacked).unwrap();
 
@@ -75,6 +77,11 @@ fn main() {
     .unwrap();
     imshow("MATCHES", &visualized).unwrap();
     wait_key(0).unwrap();
+    imwrite(
+        "matches.jpg",
+        &visualized,
+        &Vector::from_slice(&[]),
+    ).unwrap();
 
     imwrite(
         cli_matches.value_of("output").unwrap(),
