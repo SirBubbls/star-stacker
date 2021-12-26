@@ -16,32 +16,49 @@ fn main() {
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
         .about(env!("CARGO_PKG_DESCRIPTION"))
-        .arg(
+        .args(&vec![
             Arg::with_name("input")
                 .short("i")
                 .long("input")
                 .value_name("GLOB")
                 .required(true)
-                .help("")
+                .help("path to input image files as a glob pattern (\"./images/*.png\")")
                 .takes_value(true),
-        )
-        .arg(
             Arg::with_name("output")
                 .short("o")
                 .long("output")
                 .value_name("OUTPUT_FILE")
                 .takes_value(true),
-        )
+            Arg::with_name("target_landmarks")
+                .value_name("N_TARGET_LANDMARKS")
+                .long("target")
+                .help("this value describes roughly how many stars should be detected in each image")
+                .takes_value(true)
+                .default_value("20"),
+            Arg::with_name("matching_precision")
+                .value_name("MATCHIN_PRECISION")
+                .long("precision")
+                .help("max pixel distance between matched stars")
+                .takes_value(true)
+                .default_value("3.5")
+        ])
         .get_matches();
 
     // load images
     let images = image_loading::load_image_series(cli_matches.value_of("input").unwrap());
 
+    // threshold value probing
+    info!("Probing for a good threshold value...");
+    let threshold = star_detection::probe_response_threshold(
+        &images[0],
+         cli_matches.value_of("target_landmarks").unwrap().parse::<i32>().expect("Pass in a number as target.")
+    );
+
     // extract stars
     let t_start = time::Instant::now();
     let keypoints = images
         .iter()
-        .map(star_detection::detect_keypoints)
+        .map(|kp| star_detection::detect_keypoints(kp, threshold))
         .collect::<Vec<Vector<KeyPoint>>>();
     let mut avg_stars: f32 = 0.0;
     keypoints.iter().for_each(|stars| {avg_stars += (stars.len() / images.len()) as f32;});
@@ -49,8 +66,15 @@ fn main() {
 
     // aligning frames
     info!("Aligning {} frames", images.len());
+    let matching_precision = cli_matches.value_of("matching_precision")
+                                        .unwrap()
+                                        .parse::<f32>()
+        .expect("You need to pass in a float as a precision parameter");
     let t_start = time::Instant::now();
-    let aligned = alignment::align_series(&images, &keypoints);
+    let aligned = alignment::align_series(&images,
+                                          &keypoints,
+                                          matching_precision
+    );
     info!("Alignment took ~{}ms", t_start.elapsed().as_millis());
 
     // stacking frames

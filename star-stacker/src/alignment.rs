@@ -55,12 +55,13 @@ fn min_pos_delta_match(source: &Vector<KeyPoint>, target: &Vector<KeyPoint>) -> 
 
 pub fn get_matches(
     source: &Vector<KeyPoint>,
-    dest: &Vector<KeyPoint>
+    dest: &Vector<KeyPoint>,
+    precision: f32
 ) -> Vector<DMatch> {
     let matches: Vector<DMatch> = Vector::from_iter(
         min_pos_delta_match(source, dest)
             .into_iter()
-            .filter(|x| x.distance < 3.5),
+            .filter(|x| x.distance < precision),
     );
     matches.iter().for_each(|m| {
         debug!(
@@ -104,7 +105,7 @@ pub fn find_alignment_homography(
 }
 
 
-pub fn align_series(images: &[Mat], keypoints: &[Vector<KeyPoint>]) -> Vec<Mat> {
+pub fn align_series(images: &[Mat], keypoints: &[Vector<KeyPoint>], precisison: f32) -> Vec<Mat> {
     let size = images[0].size().unwrap();
 
     let transformations = keypoints.iter()
@@ -113,7 +114,7 @@ pub fn align_series(images: &[Mat], keypoints: &[Vector<KeyPoint>]) -> Vec<Mat> 
                                    .rev()
                                    .map(|(i, source_kp)| {
                                        let target_kp = &keypoints[i - 1];
-                                       let matches = get_matches(source_kp, target_kp);
+                                       let matches = get_matches(source_kp, target_kp, precisison);
                                        find_alignment_homography(&matches, source_kp, target_kp)
     }).collect::<Vec<Mat>>();
     let mut transformed = images.iter().enumerate().skip(1).map(|(i, image)| {
