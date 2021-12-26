@@ -1,7 +1,8 @@
 use opencv::imgcodecs::{imread, ImreadModes};
 use opencv::core::Mat;
-use log::info;
+use log::debug;
 use glob::glob;
+use rayon::prelude::*;
 
 
 /// Load a series of images by a glob path.
@@ -10,9 +11,9 @@ pub fn load_image_series(glob_path: &str) -> Vec<Mat> {
                           .map(|file| file.unwrap().as_os_str().to_str().unwrap().to_string())
                           .collect();
     // files.par_iter()
-    files.iter()
+    files.par_iter()
         .map(|path| {
-          info!("Loading image: {}", path);
+          debug!("Loading image: {}", path);
           imread(path, ImreadModes::IMREAD_COLOR as i32).unwrap()
         })
         .collect()
