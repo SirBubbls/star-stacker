@@ -1,12 +1,9 @@
 use clap::{App, Arg};
-use opencv::{
-    features2d::draw_matches,
-    highgui::{imshow, wait_key},
-};
 use log::info;
-use opencv::core::{KeyPoint, Mat, Scalar, Vector};
+use opencv::core::{KeyPoint, Vector};
 use opencv::imgcodecs::imwrite;
 use stacking::stack_image;
+use std::time;
 
 mod alignment;
 mod image_loading;
@@ -40,49 +37,33 @@ fn main() {
     // load images
     let images = image_loading::load_image_series(cli_matches.value_of("input").unwrap());
 
-    let stacked = stack_image(&images);
-    imwrite("stacked.jpg", &stacked, &Vector::default()).unwrap();
     // extract stars
+    let t_start = time::Instant::now();
     let keypoints = images
         .iter()
         .map(star_detection::detect_keypoints)
         .collect::<Vec<Vector<KeyPoint>>>();
+    let mut avg_stars: f32 = 0.0;
+    keypoints.iter().for_each(|stars| {avg_stars += (stars.len() / images.len()) as f32;});
+    info!("Detected stars (avg. per image {}) in ~{}ms (total)", avg_stars, t_start.elapsed().as_millis());
 
+    // aligning frames
+    info!("Aligning {} frames", images.len());
+    let t_start = time::Instant::now();
     let aligned = alignment::align_series(&images, &keypoints);
+    info!("Alignment took ~{}ms", t_start.elapsed().as_millis());
 
-
+    // stacking frames
     info!("Stacking {} frames", aligned.len());
+    let t_start = time::Instant::now();
     let stacked = stack_image(&aligned);
-    imshow("Stacked and aligned", &stacked).unwrap();
+    info!("Stacking took ~{}ms", t_start.elapsed().as_millis());
 
-    // genrate matches
-    let matches = alignment::get_matches(&keypoints[1], &keypoints[0]);
-    let mut visualized = Mat::default();
-    draw_matches(
-        &images[1],
-        &keypoints[1],
-        &images[0],
-        &keypoints[0],
-        &matches,
-        &mut visualized,
-        Scalar::all(-1.0),
-        Scalar::new(0.0, 0.0, 255.0, 0.0),
-        &Vector::default(),
-        opencv::features2d::DrawMatchesFlags::DEFAULT,
-    )
-    .unwrap();
-    imshow("MATCHES", &visualized).unwrap();
-    wait_key(0).unwrap();
-    imwrite(
-        "matches.jpg",
-        &visualized,
-        &Vector::from_slice(&[]),
-    ).unwrap();
-
+    // writing output file
+    info!("Writing file to '{}'", cli_matches.value_of("output").unwrap());
     imwrite(
         cli_matches.value_of("output").unwrap(),
         &stacked,
         &Vector::from_slice(&[]),
-    )
-    .expect("Unable to write output file");
+    ).expect("Unable to write output file");
 }
