@@ -1,14 +1,10 @@
-use alignment::find_alignment_homography;
 use clap::{App, Arg};
 use opencv::{
-    core::DecompTypes,
     features2d::draw_matches,
     highgui::{imshow, wait_key},
-    imgproc::{get_affine_transform, warp_perspective},
 };
-// use rayon::prelude::*;
 use log::info;
-use opencv::core::{invert, KeyPoint, Mat, Scalar, Vector};
+use opencv::core::{KeyPoint, Mat, Scalar, Vector};
 use opencv::imgcodecs::imwrite;
 use stacking::stack_image;
 

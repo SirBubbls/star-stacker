@@ -1,9 +1,6 @@
 use std::fs::File;
 use std::path::Path;
 use rawloader::RawImage;
-use std::slice::Chunks;
-use std::fmt::Binary;
-use tiff::decoder::Decoder;
 
 
 #[test]

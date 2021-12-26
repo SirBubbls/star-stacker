@@ -21,6 +21,8 @@ pub fn detect_keypoints(image: &Mat) -> Vector<KeyPoint> {
     keypoints
 }
 
+
+#[allow(dead_code)]
 pub fn draw_keypoints(image: &Mat, keypoints: &Vector<KeyPoint>) -> Mat {
     let overlay_color = Scalar::new(0.0, 0.0, 255.0, 0.0);
     let mut overlay_image = image.clone();

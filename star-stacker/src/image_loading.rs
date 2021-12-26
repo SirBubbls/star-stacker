@@ -2,7 +2,6 @@ use opencv::imgcodecs::{imread, ImreadModes};
 use opencv::core::Mat;
 use log::info;
 use glob::glob;
-use rayon::prelude::*;
 
 
 /// Load a series of images by a glob path.
