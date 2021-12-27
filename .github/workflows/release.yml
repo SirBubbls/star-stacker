@@ -22,10 +22,23 @@ jobs:
         run: sudo apt install -y clang libclang-dev libopencv-dev python3-opencv
       - name: Build project
         run: cd star-stacker; cargo build --release --locked
-      - name: Upload binary to release
-        uses: svenstaro/upload-release-action@v1-release
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/release/${{ matrix.artifact_name }}
-          asset_name: ${{ matrix.asset_name }}
-          tag: ${{ github.event.client_payload.new_version }}
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./star-stacker/target/release/star-stacker
+          asset_name: my-artifact.zip
+          asset_content_type: application/zip
