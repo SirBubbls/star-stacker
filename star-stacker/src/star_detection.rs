@@ -1,28 +1,18 @@
 use opencv::prelude::*;
 use opencv::core::{Scalar, Mat, Vector, KeyPoint};
+use opencv::xfeatures2d::StarDetector;
 use log::debug;
 
 static MAX_STARS_IN_IMAGE: i32 = 750;
 
 pub fn probe_response_threshold(image: &Mat, target: i32) -> u8 {
     if target > MAX_STARS_IN_IMAGE { panic!("Target to big > {}", MAX_STARS_IN_IMAGE); }
-    let mut keypoints = Vector::<KeyPoint>::default();
 
     let mut response_threshold: u8 = 100;
 
     let mut star_count = 0;
     while star_count < target || star_count > MAX_STARS_IN_IMAGE {
-
-        let mut star_detector = opencv::xfeatures2d::StarDetector::create(
-                5,
-                response_threshold.into(),
-                10,
-                8,
-                5
-        ).unwrap();
-
-        star_detector.detect(&image, &mut keypoints, &opencv::core::Mat::default())
-                    .expect("Unable to detect stars from image.");
+        let keypoints = detect_keypoints(&image, response_threshold);
 
         star_count = keypoints.len() as i32;
         debug!("Got {} hits with response threshold {}", star_count, response_threshold);
@@ -44,7 +34,7 @@ pub fn probe_response_threshold(image: &Mat, target: i32) -> u8 {
 pub fn detect_keypoints(image: &Mat, threshold: u8) -> Vector<KeyPoint> {
     let mut keypoints = Vector::<KeyPoint>::default();
 
-    let mut star_detector = opencv::xfeatures2d::StarDetector::create(
+    let mut star_detector = StarDetector::create(
             5,
             threshold as i32,
             10,
