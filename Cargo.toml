@@ -5,7 +5,7 @@ edition = "2018"
 authors = ["Lucas Sas Brunschier <lucassas@live.de>"]
 homepage = "https://github.com/SirBubbls/star-stacker"
 repository = "https://github.com/SirBubbls/star-stacker"
-readme = "../README.org"
+readme = "README.org"
 keywords = ["computer-vision", "image-processing", "astrophotography", "opencv"]
 
 

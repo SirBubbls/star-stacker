@@ -2,8 +2,8 @@ name: Build and upload binaries to release
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
 
 jobs:
   release:
@@ -21,7 +21,9 @@ jobs:
       - name: Install external build dependencies
         run: sudo apt install -y clang libclang-dev libopencv-dev python3-opencv
       - name: Build project
-        run: cd star-stacker; cargo build --release --locked
+        run: |
+          cargo build --release --locked;
+          zip target/release/star-stacker.zip target/release/star-stacker;
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -40,5 +42,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./star-stacker/target/release/star-stacker
-          asset_name: my-artifact.zip
+          asset_name: star-stacker
           asset_content_type: application/zip
