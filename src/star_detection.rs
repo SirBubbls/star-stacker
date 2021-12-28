@@ -4,8 +4,8 @@ use opencv::prelude::*;
 #[cfg(feature = "opencvx")]
 use opencv::xfeatures2d::StarDetector;
 
+#[cfg(feature = "opencvx")]
 static MAX_STARS_IN_IMAGE: i32 = 750;
-
 
 #[cfg(feature = "opencvx")]
 pub fn probe_response_threshold(image: &Mat, target: i32) -> u8 {

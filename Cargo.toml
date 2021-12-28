@@ -8,6 +8,13 @@ repository = "https://github.com/SirBubbls/star-stacker"
 readme = "README.org"
 keywords = ["computer-vision", "image-processing", "astrophotography", "opencv"]
 
+[lib]
+name = "star_stacker_lib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "star-stacker"
+path = "src/main.rs"
 
 [dependencies]
 rawloader="0.37.0"
