@@ -66,7 +66,7 @@ fn main() {
                     "this value describes roughly how many stars should be detected in each image",
                 )
                 .takes_value(true)
-                .default_value("30"),
+                .default_value("10"),
             Arg::with_name("matching_precision")
                 .value_name("MATCHIN_PRECISION")
                 .long("precision")
