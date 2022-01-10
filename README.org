@@ -22,7 +22,8 @@ You can choose to enable those with the feature ~opencvx~ (~cargo build --featur
 #+end_quote
 
 - Install Rust as you normally would (via ~rustup~)
-- ~opencv~ will be installed with cargo
+- Install the ~opencv-dev~ package on your system (guide can be found here [[https://github.com/twistedfall/opencv-rust][Opencv Bindings for Rust]])
+- Build the project with ~cargo build~
 
 * Usage
 You can just compile and run this program with:
