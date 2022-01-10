@@ -1,2 +1,2 @@
 [lfs]
-    fetchexclude = datasets
+    fetchexclude = datasets/**/*
