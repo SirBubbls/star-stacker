@@ -31,6 +31,24 @@ You can just compile and run this program with:
 cargo run -- -i "GLOB_IMAGES" -o "output.png"
 #+end_src
 
+** Examples
+The repository comes with 3 example datasets you can try out right away.
+Because they are rather big (around 1 GB) you need to pull them manually with ~git lfs fetch --all~ assuming you already have Git LFS installed.
+To run the examples you can just run:
+
+#+begin_src bash
+cargo run -- --input="./datasets/horizontal/*.png" -o "example-horizontal.png" --precision 3
+#+end_src
+
+#+begin_src bash
+cargo run -- --input="./datasets/vertical_full_size/*.png" -o "example-vertical-fs.png" --precision 3.5
+#+end_src
+
+Because of the small image size in the last example we need to adjust the ~threshold~ for star detection and the ~precision~ for mapping.
+#+begin_src bash
+cargo run -- --input="./datasets/vertical_small_size/*.png" -o "example-vertical-ss.png" --precision 15 --threshold 4
+#+end_src
+
 * Results
 [[./docs/images/side-by-side-bright.jpg]]
 
