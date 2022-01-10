@@ -53,10 +53,10 @@ pub fn detect_keypoints(image: &Mat, threshold: u8) -> Vector<KeyPoint> {
 
 
 #[cfg(not(feature = "opencvx"))]
-pub fn detect_keypoints(image: &Mat) -> Vector<KeyPoint> {
+pub fn detect_keypoints(image: &Mat, threshold: f32) -> Vector<KeyPoint> {
     let mut detector = opencv::features2d::SimpleBlobDetector::create(
         opencv::features2d::SimpleBlobDetector_Params {
-            threshold_step: 10.0,
+            threshold_step: threshold,
             min_threshold: 150.0,
             max_threshold: 255.0,
             min_repeatability: 3,

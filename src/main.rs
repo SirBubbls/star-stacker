@@ -23,10 +23,10 @@ fn im_series_star_detectionx(images: &[Mat], target: i32) -> Vec<Vector<KeyPoint
 }
 
 #[cfg(not(feature = "opencvx"))]
-fn im_series_star_detection(images: &[Mat]) -> Vec<Vector<KeyPoint>> {
+fn im_series_star_detection(images: &[Mat], threshold: f32) -> Vec<Vector<KeyPoint>> {
     images
         .iter()
-        .map(star_detection::detect_keypoints)
+        .map(|im| star_detection::detect_keypoints(&im, threshold))
         .collect::<Vec<Vector<KeyPoint>>>()
 }
 
@@ -58,6 +58,15 @@ fn main() {
                 )
                 .takes_value(true)
                 .default_value("20"),
+            #[cfg(not(feature = "opencvx"))]
+            Arg::with_name("threshold")
+                .value_name("SIZE_THRESHOLD")
+                .long("threshold")
+                .help(
+                    "this value describes roughly how many stars should be detected in each image",
+                )
+                .takes_value(true)
+                .default_value("30"),
             Arg::with_name("matching_precision")
                 .value_name("MATCHIN_PRECISION")
                 .long("precision")
@@ -69,6 +78,9 @@ fn main() {
 
     // load images
     let images = image_loading::load_image_series(cli_matches.value_of("input").unwrap());
+    if images.is_empty() {
+        panic!("No images were loaded.");
+    }
 
     // extract stars
     let t_start = time::Instant::now();
@@ -86,7 +98,7 @@ fn main() {
         }
         #[cfg(not(feature = "opencvx"))]
         {
-        im_series_star_detection(&images)
+            im_series_star_detection(&images, cli_matches.value_of("threshold").unwrap().parse::<f32>().unwrap())
         }
     };
 
