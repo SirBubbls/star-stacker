@@ -24,7 +24,8 @@ jobs:
         run: |
           cargo build --release --locked;
           chmod +x target/release/star-stacker
-          tar -czvf target/release/${{ matrix.asset_name }}.tar.gz target/release/star-stacker;
+          cd target/release
+          tar -czvf ${{ matrix.asset_name }}.tar.gz star-stacker;
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
