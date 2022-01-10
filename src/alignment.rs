@@ -101,7 +101,7 @@ pub fn find_alignment_homography(
                     &mut Mat::default(),
                     RANSAC,
                     5.0
-    ).unwrap()
+    ).expect("Unable to find alignment homography for an image pair.")
 }
 
 
